@@ -29,6 +29,12 @@
   --life-accent-dim: #4E6F70;
 }
 
+/* The `.setup` and `.game` rules below both set their own `display`, which
+   (being an author-stylesheet rule) overrides the browser's default
+   `[hidden] { display: none }` — so toggling `.hidden = true/false` in JS
+   didn't actually hide anything. This restores that. */
+[hidden] { display: none !important; }
+
 * { box-sizing: border-box; }
 
 html, body {
@@ -473,6 +479,44 @@ select {
   font-style: italic;
 }
 
+.story-so-far {
+  max-width: 640px;
+  margin: 0 auto 28px;
+  padding: 14px 18px;
+  background: var(--paper-dim);
+  border: 1px solid #D6C9A6;
+  border-radius: 6px;
+}
+.story-so-far-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--lantern-dim);
+  text-transform: uppercase;
+}
+.story-so-far ul {
+  margin: 8px 0 0;
+  padding-left: 18px;
+}
+.story-so-far li {
+  font-size: 13.5px;
+  color: var(--paper-ink);
+  line-height: 1.5;
+  margin-bottom: 3px;
+}
+.story-see-more {
+  display: block;
+  margin-top: 8px;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--lantern-dim);
+  font-size: 12.5px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.story-see-more:hover { color: var(--lantern); }
+
 .entry-system {
   font-family: 'JetBrains Mono', monospace;
   font-size: 12px;
@@ -536,6 +580,22 @@ select {
 }
 .journal-input button:disabled { opacity: 0.5; cursor: default; }
 
+.continue-btn {
+  background: transparent !important;
+  color: var(--paper-ink) !important;
+  border: 1px solid var(--paper-dim) !important;
+  white-space: nowrap;
+}
+.continue-btn:hover:not(:disabled) { border-color: var(--lantern-dim); }
+
+.entry-continue {
+  text-align: center;
+  color: #8A7F5E;
+  font-size: 12.5px;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.03em;
+}
+
 .journal-error {
   padding: 0 clamp(20px, 8vw, 120px) 14px;
   margin: 0;
@@ -554,7 +614,8 @@ select {
   .dossier-section { flex: 1 1 45%; margin-bottom: 12px; }
   .small { margin-top: 12px; }
   .journal-log { padding: 24px 18px 14px; }
-  .journal-input { padding: 12px 18px 16px; }
+  .journal-input { padding: 12px 18px 16px; flex-wrap: wrap; }
+  .journal-input input { flex: 1 1 100%; }
   .journal-error { padding: 0 18px 12px; }
   .quickstart-row { flex-direction: column; }
 }
