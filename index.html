@@ -97,45 +97,56 @@
 
 <!-- ============ GAME SCREEN ============ -->
 <div id="game" class="game" hidden>
-  <aside class="dossier">
+  <aside class="dossier" id="dossier">
     <div class="dossier-head">
-      <span class="dossier-label">Dossier</span>
-      <h2 id="dChar">—</h2>
-    </div>
-
-    <div class="stat-block">
-      <div class="stat-row">
-        <span class="stat-name">HP</span>
-        <div class="hp-track"><div class="hp-fill" id="hpFill"></div></div>
-        <span class="stat-value" id="hpText">—</span>
+      <div>
+        <span class="dossier-label">Dossier</span>
+        <h2 id="dChar">—</h2>
       </div>
-      <div class="stat-row">
-        <span class="stat-name">Cash</span>
-        <span class="stat-value cash-value" id="cashText">—</span>
+      <button type="button" id="dossierToggle" class="dossier-toggle-btn" aria-expanded="false">Details ▾</button>
+    </div>
+
+    <div class="dossier-summary" id="dossierSummary">
+      <span id="hpSummary">HP —</span>
+      <span class="dot">·</span>
+      <span id="cashSummary">Cash —</span>
+    </div>
+
+    <div class="dossier-body" id="dossierBody">
+      <div class="stat-block">
+        <div class="stat-row">
+          <span class="stat-name">HP</span>
+          <div class="hp-track"><div class="hp-fill" id="hpFill"></div></div>
+          <span class="stat-value" id="hpText">—</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-name">Cash</span>
+          <span class="stat-value cash-value" id="cashText">—</span>
+        </div>
       </div>
-    </div>
 
-    <div class="dossier-section">
-      <span class="dossier-label">Status</span>
-      <ul id="statusList" class="status-list"></ul>
-    </div>
+      <div class="dossier-section">
+        <span class="dossier-label">Status</span>
+        <ul id="statusList" class="status-list"></ul>
+      </div>
 
-    <div class="dossier-section">
-      <span class="dossier-label">Party</span>
-      <ul id="partyRoster" class="roster"></ul>
-    </div>
+      <div class="dossier-section">
+        <span class="dossier-label">Party</span>
+        <ul id="partyRoster" class="roster"></ul>
+      </div>
 
-    <div class="dossier-section">
-      <span class="dossier-label">Inventory</span>
-      <ul id="inventory" class="inventory-list"></ul>
-    </div>
+      <div class="dossier-section">
+        <span class="dossier-label">Inventory</span>
+        <ul id="inventory" class="inventory-list"></ul>
+      </div>
 
-    <div class="dossier-section quest-box">
-      <span class="dossier-label">Quest</span>
-      <p id="dQuest"></p>
-    </div>
+      <div class="dossier-section quest-box">
+        <span class="dossier-label">Quest</span>
+        <p id="dQuest"></p>
+      </div>
 
-    <button type="button" id="newGameBtn" class="ghost-btn small">🔁 New game</button>
+      <button type="button" id="newGameBtn" class="ghost-btn small">🔁 New game</button>
+    </div>
   </aside>
 
   <section class="journal">
