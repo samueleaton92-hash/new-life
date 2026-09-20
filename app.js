@@ -7,7 +7,29 @@
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 const STORAGE_KEY = "waybook_session_v1";
 const KEY_STORAGE = "waybook_api_key";
-const CONSOLIDATE_EVERY = 3; // summarize the running transcript after this many player turns
+const CONSOLIDATE_EVERY = 2; // summarize the running transcript after this many player turns
+
+// ---------- Name pools (used by both quick-start randomizers) ----------
+
+const NAME_POOLS = {
+  UK: {
+    first: ["Rowan", "Edith", "Gethin", "Isla", "Constance", "Peter", "Nadia", "Mireille", "Declan", "Freya", "Osian", "Bronwyn"],
+    last: ["Ashcombe", "Marlowe", "Pryce", "Fenwick", "Trelawny", "Holloway", "Okonkwo", "Auberon", "Whitlock", "Carrow"],
+  },
+  Australia: {
+    first: ["Reg", "Mackenzie", "Frankie", "Bel", "Ollie", "Yindi", "Callum", "Dev", "Tilly", "Jarrah", "Nyah", "Cooper"],
+    last: ["Halloran", "Ilott", "Doyle", "Carrington", "Tran", "Walsh", "Reeve", "Petrakis", "Ngata", "Fairweather"],
+  },
+};
+
+function randomName(region) {
+  const pool = NAME_POOLS[region] || NAME_POOLS.UK;
+  return `${pool.first[randomInt(0, pool.first.length - 1)]} ${pool.last[randomInt(0, pool.last.length - 1)]}`;
+}
+
+function randomInt(min, max) {
+  return min + Math.floor(Math.random() * (max - min + 1));
+}
 
 // ---------- Random adventure seeds (UK & Australia) ----------
 
@@ -15,191 +37,182 @@ const RANDOM_SEEDS = [
   {
     region: "UK",
     setting: "Whitby, on the Yorkshire coast, in the week the equinox tide drops low enough to expose the smugglers' tunnels under the abbey cliff — tunnels that haven't seen daylight since a bell went missing from the church above in 1901.",
-    charName: "Rowan Ashcombe",
     charDesc: "A maritime archivist on sabbatical, more comfortable with shipping ledgers than people, who came to Whitby chasing a footnote about the missing bell and found the tide had other plans.",
     quest: "Find out what really happened to the church bell in 1901, and what's been keeping the tunnel mouth sealed ever since.",
     startItems: "brass lantern, tide almanac, a rubbing of the bell's old inscription",
+    cash: 40,
   },
   {
     region: "UK",
     setting: "A crumbling manor on the Norfolk Fens, cut off by floodwater for the third winter running, where the tenant farmers swear something walks the causeway when the mist comes in.",
-    charName: "Edith Marlowe",
     charDesc: "A folklore collector sent by a university that stopped funding her a year ago, still finishing the job on her own coin.",
     quest: "Record what's really happening on the causeway before the last farming family gives up the tenancy for good.",
     startItems: "wax cylinder recorder, oilskin notebook, a borrowed shotgun she's never fired",
+    cash: 15,
   },
   {
     region: "UK",
     setting: "A Welsh mining valley the year after the pit closed, where the old union hall has been quietly reopened by someone nobody in the village will name.",
-    charName: "Gethin Pryce",
     charDesc: "A laid-off surveyor who knows the tunnels under the valley better than anyone left alive, and owes the wrong person a favour.",
     quest: "Find out who reopened the union hall, and what they're using the old shafts for.",
     startItems: "pit lamp, hand-drawn tunnel survey, a union card that shouldn't still be valid",
+    cash: 8,
   },
   {
     region: "UK",
     setting: "The Scottish Highlands during a stalking season gone wrong, where the estate's gamekeeper has vanished and the deer count doesn't add up.",
-    charName: "Isla Fenwick",
     charDesc: "An apprentice stalker three seasons in, trusted with the rifle but not yet the secrets of the estate.",
     quest: "Find the missing gamekeeper before the estate's owner brings in outside help who won't ask the right questions.",
     startItems: "stalking rifle, estate map, a torn page from the gamekeeper's log",
+    cash: 12,
   },
   {
     region: "UK",
     setting: "A 1920s smuggler's port on the Cornish coast, run by three rival families and one harbourmaster nobody has managed to buy.",
-    charName: "Constance Trelawny",
     charDesc: "The harbourmaster's estranged daughter, back in town for a funeral and immediately mistaken for someone with far more leverage than she has.",
     quest: "Work out which family is behind the missing excise ledgers before the harbourmaster's death is ruled anything but natural.",
     startItems: "harbour keys, a ledger page torn free, a revolver that isn't loaded",
+    cash: 25,
   },
   {
     region: "UK",
     setting: "An English cathedral city in the last week before a controversial restoration begins, when a mason's mark turns up in the crypt matching no known guild.",
-    charName: "Peter Holloway",
     charDesc: "A conservation architect whose entire career is riding on this restoration going smoothly, which it is now very much not doing.",
     quest: "Identify the mark before the restoration board decides it's easier to simply plaster over the crypt.",
     startItems: "rubbing kit, cathedral floor plans, a set of borrowed crypt keys",
+    cash: 60,
   },
   {
     region: "UK",
     setting: "A London Underground station, closed since the Blitz, that maintenance crews insist keeps reappearing on their tunnel maps despite being formally sealed decades ago.",
-    charName: "Nadia Okonkwo",
     charDesc: "A transport authority engineer sent to close out a paperwork anomaly, who did not sign up for what she found in the ventilation shaft.",
     quest: "Work out why the station keeps showing up on the maps, and what's using it, before the anomaly reaches head office.",
     startItems: "hard hat with headlamp, 1940s station schematic, a two-way radio with patchy signal",
+    cash: 30,
   },
   {
     region: "Australia",
     setting: "A mining claim in the Western Australian outback where the water table has started behaving like nothing the old survey charts predicted.",
-    charName: "Reg Halloran",
     charDesc: "The town's last licensed prospector, more used to reading rock than people, roped into helping the shire council figure out where the water's coming from.",
     quest: "Trace the flooding to its source before it swallows what's left of the old workings — and the town's water table with it.",
     startItems: "hand-cranked water pump gauge, old mine survey chart, hip flask",
+    cash: 20,
   },
   {
     region: "Australia",
     setting: "A marine research vessel anchored off the Great Barrier Reef, mid-survey on a bleaching event, when the dive team pulls up something from a wreck site that isn't in any of the charts.",
-    charName: "Mackenzie Ilott",
     charDesc: "A marine biologist three years into a coral-decline study, more at home underwater than on deck, whose funding depends on this trip going smoothly.",
     quest: "Identify what the dive team found before the ship's owner decides it's not worth the delay to the survey schedule.",
     startItems: "dive logbook, underwater camera, a sample vial with no label",
+    cash: 45,
   },
   {
     region: "Australia",
     setting: "Melbourne's laneways in the winter of 1948, all wet cobblestone and tram bells, where a jazz club owner has gone missing along with a ledger that several very interested parties would like back.",
-    charName: "Frankie Doyle",
     charDesc: "A demobbed private investigator working out of a one-room office above a milk bar, three weeks behind on rent and not fussy about clients.",
     quest: "Find the missing ledger — and the club owner — before whoever wants it back stops asking nicely.",
     startItems: "notebook and pencil, a spare set of skeleton keys, half a packet of cigarettes",
+    cash: 6,
   },
   {
     region: "Australia",
     setting: "A remote sheep station in outback Queensland during the worst drought in a generation, where the station's bore water has started tasting of something nobody can name.",
-    charName: "Bel Carrington",
     charDesc: "The station manager's daughter, home from agricultural college to help keep the place afloat, unwilling to admit how bad the season has actually gotten.",
     quest: "Work out what's fouling the bore before the last of the stock has to be sold off.",
     startItems: "water test kit, station ledger, ute keys",
+    cash: 18,
   },
   {
     region: "Australia",
     setting: "A wilderness airstrip in Tasmania's south-west, weathered in for the third day running, where a bushwalking group radioed for help and then stopped answering entirely.",
-    charName: "Ollie Tran",
     charDesc: "A volunteer search-and-rescue pilot with more hours flying this coastline than anyone else on the roster, grounded until the weather breaks.",
     quest: "Find the missing bushwalking group before the weather window closes for good.",
     startItems: "topographic map, emergency beacon receiver, a thermos that's gone cold",
+    cash: 35,
   },
   {
     region: "Australia",
     setting: "A heritage pearling lugger moored off Broome at the start of the wet season, where the crew has found something in an oyster shell that isn't a pearl.",
-    charName: "Yindi Walsh",
     charDesc: "A third-generation pearling deckhand who knows this water better than the charts do, and doesn't trust what just came up in the dredge.",
     quest: "Identify what's inside the shell before the lugger's owner decides to sell it to the first buyer who asks no questions.",
     startItems: "oyster knife, tide chart, a hessian sack with something heavy in it",
+    cash: 10,
   },
   {
     region: "Australia",
     setting: "A gold-rush ghost town in regional Victoria, reopened as a heritage tourist site, where the restoration crew keeps finding the same grave freshly disturbed no matter how many times they fill it in.",
-    charName: "Callum Reeve",
     charDesc: "A heritage-site caretaker two seasons into the job, whose predecessor left without giving notice or much of an explanation.",
     quest: "Work out who — or what — keeps disturbing the grave before the heritage trust pulls the site's funding over it.",
     startItems: "site keys, caretaker's logbook, a shovel that's seen too much use this month",
+    cash: 22,
   },
 ];
 
-function applyRandomSeed() {
-  const seed = RANDOM_SEEDS[Math.floor(Math.random() * RANDOM_SEEDS.length)];
-  document.getElementById("setting").value = seed.setting;
-  document.getElementById("charName").value = seed.charName;
-  document.getElementById("charDesc").value = seed.charDesc;
-  document.getElementById("quest").value = seed.quest;
-  document.getElementById("startItems").value = seed.startItems;
-
-  const note = document.getElementById("randomizeNote");
-  note.textContent = `Loaded a ${seed.region} story — steps 2 to 5 are filled in. Edit anything, or roll again.`;
-  note.hidden = false;
-}
-
-document.getElementById("randomizeBtn").addEventListener("click", applyRandomSeed);
-
 // ---------- "Life at 18" randomizer — real UK/Australia years, 1992-2026 ----------
 
-// Era buckets give period-accurate flavour. Bucketed by decade-ish span,
-// each with a UK detail, an Australia detail, and a short list of items
-// an 18-year-old plausibly has on them that year.
 const LIFE_ERAS = [
   {
     from: 1992, to: 1994,
     uk: "the last recession-shadowed years before Britpop breaks, Ceefax still the fastest way to check the football scores, and a landline is the only way anyone's reaching you tonight",
     au: "the tail end of a deep recession, cricket on the radio in the kitchen, and STD phone booths still doing steady trade outside the milk bar",
     items: "a Walkman with one good pair of headphones, a library card, a fiver that has to last the week",
+    cash: 5,
   },
   {
     from: 1995, to: 1999,
     uk: "Britpop on every radio, a family computer that ties up the phone line whenever anyone dials up the internet, and a pager that only ever seems to go off at the worst moment",
     au: "the last summer before mobile phones are properly common, a share house with a shared dial-up connection, and cricket on in the background of everything",
-    items: "a mixtape three friends contributed to, a pager, a crumpled TAB or bus ticket",
+    items: "a mixtape three friends contributed to, a pager, a crumpled bus ticket",
+    cash: 10,
   },
   {
     from: 2000, to: 2004,
     uk: "the flat, uncertain years right after Y2K turned out to be nothing, a Nokia everyone can text on but nobody can afford to call from, and MSN Messenger as the real social life",
     au: "the Sydney Olympics still fresh in everyone's memory, a Nokia brick phone with a battery that lasts a week, and dial-up finally giving way to something faster",
     items: "a Nokia handset, a CD wallet, an EFTPOS card that's usually declined",
+    cash: 20,
   },
   {
     from: 2005, to: 2008,
     uk: "MySpace giving way to Facebook, an iPod everyone's jealous of, and a part-time job that pays for a mobile plan and not much else",
     au: "the tail end of the mining boom's good mood, a first-gen Facebook account, and a P-plate stuck on the back of a car that's only sometimes reliable",
     items: "an iPod with a cracked screen protector, a set of house keys on a lanyard, a P-plate",
+    cash: 30,
   },
   {
     from: 2009, to: 2012,
     uk: "the country still climbing out of the financial crisis, a first smartphone that's really just for texting and Facebook, and university fees that just went up and everyone's furious about it",
     au: "the aftermath of the GFC felt mostly through the news, a first smartphone with a data plan nobody quite understands, and a gap-year backpacking trip everyone's saving for",
     items: "an early smartphone, a student card, a half-finished job application",
+    cash: 25,
   },
   {
     from: 2013, to: 2016,
     uk: "Instagram replacing Facebook as the thing that matters, zero-hour contracts as the going rate for a first job, and a referendum argument that's about to split every family dinner",
     au: "Instagram and share-house group chats, a casual hospitality job that never quite gives enough shifts, and a Centrelink queue that eats half a Tuesday",
     items: "a smartphone permanently at 20% battery, a share-house key, a payslip that's shorter than expected",
+    cash: 35,
   },
   {
     from: 2017, to: 2019,
     uk: "gig-economy work as the default first job, a group chat that never stops buzzing, and a housing market that makes moving out feel like a joke",
     au: "gig-economy delivery work between uni units, a group chat that never stops buzzing, and share-house rent that keeps climbing every lease renewal",
     items: "a phone full of unread group-chat messages, a delivery-app login, a reusable coffee cup that's never actually washed",
+    cash: 40,
   },
   {
     from: 2020, to: 2022,
     uk: "the strange flattened months of lockdowns and Zoom calls, a school leaving that never got its proper send-off, and a job market that's either frozen solid or suddenly desperate for anyone",
     au: "state border closures that cut whole families off from each other, a school formal cancelled twice, and a JobKeeper-era workplace that's either shut or unrecognisably busy",
     items: "a mask stuffed in a jacket pocket, a laptop that's seen a hundred video calls, a vaccination certificate on the phone",
+    cash: 45,
   },
   {
     from: 2023, to: 2026,
     uk: "AI tools quietly doing half of everyone's coursework, a cost-of-living squeeze that makes every first payslip disappear fast, and a housing situation nobody under thirty finds funny",
     au: "AI tools showing up in every uni assignment brief, rent that's eaten the whole first payslip before it lands, and a share house found through a group chat rather than an agency",
     items: "a phone with more subscriptions than it can really afford, a share-house group chat pinned at the top, a half-used gift card",
+    cash: 50,
   },
 ];
 
@@ -216,109 +229,107 @@ const LIFE_QUESTS = [
   "Sort out money, a room, or a plan for the next twelve months with almost nothing solid to build it on.",
 ];
 
-function randomInt(min, max) {
-  return min + Math.floor(Math.random() * (max - min + 1));
-}
+const UK_PLACES = ["Manchester", "Cardiff", "Glasgow", "Bristol", "a small town outside Leeds", "a seaside town on the Kent coast"];
+const AU_PLACES = ["Melbourne", "Perth", "Brisbane", "a coastal town in NSW", "regional Victoria", "a suburb of Adelaide"];
 
-function applyLifeSeed() {
+function buildLifeSeed() {
   const region = Math.random() < 0.5 ? "UK" : "Australia";
   const year = randomInt(1992, 2026);
   const era = eraFor(year);
   const flavor = region === "UK" ? era.uk : era.au;
-  const place = region === "UK"
-    ? ["Manchester", "Cardiff", "Glasgow", "Bristol", "a small town outside Leeds", "a seaside town on the Kent coast"][randomInt(0, 5)]
-    : ["Melbourne", "Perth", "Brisbane", "a coastal town in NSW", "regional Victoria", "a suburb of Adelaide"][randomInt(0, 5)];
+  const place = (region === "UK" ? UK_PLACES : AU_PLACES)[randomInt(0, 5)];
 
-  document.getElementById("setting").value =
-    `${place}, ${year}. You've just turned eighteen, right in the middle of ${flavor}.`;
-  document.getElementById("charName").value = "";
-  document.getElementById("charDesc").value =
-    `Eighteen years old as of this week, still figuring out who that actually makes you. Everyone around you seems to already have an opinion about what you do next.`;
-  document.getElementById("quest").value = LIFE_QUESTS[randomInt(0, LIFE_QUESTS.length - 1)];
-  document.getElementById("startItems").value = era.items;
-
-  const note = document.getElementById("randomizeNote");
-  note.textContent = `Loaded a ${region} story set in ${year} — you're eighteen. Fill in your name, then edit anything else, or roll again.`;
-  note.hidden = false;
+  return {
+    region,
+    setting: `${place}, ${year}. You've just turned eighteen, right in the middle of ${flavor}.`,
+    charDesc: "Eighteen years old as of this week, still figuring out who that actually makes you. Everyone around you seems to already have an opinion about what you do next.",
+    quest: LIFE_QUESTS[randomInt(0, LIFE_QUESTS.length - 1)],
+    startItems: era.items,
+    cash: era.cash,
+    noteYear: year,
+  };
 }
 
-document.getElementById("lifeRandomizeBtn").addEventListener("click", applyLifeSeed);
+// ---------- Setup: quick start & manual customize ----------
 
-// ---------- Setup wizard state ----------
-
-const steps = Array.from(document.querySelectorAll(".step"));
-let currentStep = 0;
-let party = []; // [{ id, name, role, hp }]
-
-const stepper = document.getElementById("stepper");
-steps.forEach((_, i) => {
-  const dot = document.createElement("span");
-  dot.className = "dot";
-  stepper.appendChild(dot);
-});
-
-function renderStepper() {
-  const dots = stepper.querySelectorAll(".dot");
-  dots.forEach((d, i) => {
-    d.classList.toggle("active", i === currentStep);
-    d.classList.toggle("done", i < currentStep);
-  });
-}
-
-function showStep(i) {
-  steps.forEach((s, idx) => (s.hidden = idx !== i));
-  document.getElementById("prevStep").hidden = i === 0;
-  document.getElementById("nextStep").textContent =
-    i === steps.length - 1 ? "Begin expedition" : "Continue";
-  renderStepper();
-}
+let party = []; // [{ name, role }] — reset at the start of every new game
 
 function fieldValue(id) {
   return document.getElementById(id).value.trim();
 }
 
-function validateStep(i) {
+function showSetupError(msg) {
   const err = document.getElementById("setupError");
-  err.hidden = true;
-  if (i === 0 && !fieldValue("apiKey")) {
-    err.textContent = "An API key is needed to run the game master.";
-    err.hidden = false;
-    return false;
-  }
-  if (i === 1 && !fieldValue("setting")) {
-    err.textContent = "Give the game master a setting to work with.";
-    err.hidden = false;
-    return false;
-  }
-  if (i === 2 && (!fieldValue("charName") || !fieldValue("charDesc"))) {
-    err.textContent = "Your character needs a name and a description.";
-    err.hidden = false;
-    return false;
-  }
-  if (i === 4 && !fieldValue("quest")) {
-    err.textContent = "What's the quest? Even a vague one works.";
-    err.hidden = false;
-    return false;
-  }
-  return true;
+  err.textContent = msg;
+  err.hidden = false;
+}
+function hideSetupError() {
+  document.getElementById("setupError").hidden = true;
 }
 
-document.getElementById("nextStep").addEventListener("click", () => {
-  if (!validateStep(currentStep)) return;
-  if (currentStep < steps.length - 1) {
-    currentStep++;
-    showStep(currentStep);
-  } else {
-    startGame();
+function fillFormFromSeed(seed, charName) {
+  document.getElementById("setting").value = seed.setting;
+  document.getElementById("charName").value = charName;
+  document.getElementById("charDesc").value = seed.charDesc;
+  document.getElementById("quest").value = seed.quest;
+  document.getElementById("startItems").value = seed.startItems;
+  document.getElementById("startCash").value = seed.cash;
+  document.getElementById("startHp").value = 20;
+}
+
+function quickStart(kind) {
+  hideSetupError();
+  if (!fieldValue("apiKey")) {
+    showSetupError("Add your API key above first — that's what runs the game master.");
+    document.getElementById("apiKey").focus();
+    return;
   }
+
+  const seed = kind === "life"
+    ? buildLifeSeed()
+    : RANDOM_SEEDS[randomInt(0, RANDOM_SEEDS.length - 1)];
+  const charName = randomName(seed.region === "Australia" ? "Australia" : "UK");
+
+  fillFormFromSeed(seed, charName);
+  party = [];
+  clearPartyRows();
+
+  startGame();
+}
+
+document.getElementById("newAdventureBtn").addEventListener("click", () => quickStart("adventure"));
+document.getElementById("newLifeBtn").addEventListener("click", () => quickStart("life"));
+
+document.getElementById("customizeToggle").addEventListener("click", () => {
+  const form = document.getElementById("customizeForm");
+  form.hidden = !form.hidden;
+  document.getElementById("customizeToggle").textContent = form.hidden
+    ? "Customize manually instead"
+    : "Hide manual customize";
 });
 
-document.getElementById("prevStep").addEventListener("click", () => {
-  currentStep = Math.max(0, currentStep - 1);
-  showStep(currentStep);
+document.getElementById("beginCustomBtn").addEventListener("click", () => {
+  hideSetupError();
+  if (!fieldValue("apiKey")) {
+    showSetupError("An API key is needed to run the game master.");
+    return;
+  }
+  if (!fieldValue("setting")) {
+    showSetupError("Give the game master a setting to work with.");
+    return;
+  }
+  if (!fieldValue("charName") || !fieldValue("charDesc")) {
+    showSetupError("Your character needs a name and a description.");
+    return;
+  }
+  if (!fieldValue("quest")) {
+    showSetupError("What's the quest? Even a vague one works.");
+    return;
+  }
+  startGame();
 });
 
-// Setting quick-fill chips
+// Setting quick-fill chips (manual form)
 document.querySelectorAll(".chip").forEach((chip) => {
   chip.addEventListener("click", () => {
     const targetId = chip.closest(".chip-row").dataset.fillTarget;
@@ -326,7 +337,7 @@ document.querySelectorAll(".chip").forEach((chip) => {
   });
 });
 
-// Party roster builder
+// Party roster builder (manual form)
 let partyRowId = 0;
 document.getElementById("addPartyMember").addEventListener("click", () => addPartyRow());
 
@@ -342,6 +353,10 @@ function addPartyRow(name = "", role = "") {
   `;
   row.querySelector(".remove-btn").addEventListener("click", () => row.remove());
   document.getElementById("partyList").appendChild(row);
+}
+
+function clearPartyRows() {
+  document.getElementById("partyList").innerHTML = "";
 }
 
 function escapeAttr(s) {
@@ -362,7 +377,6 @@ window.addEventListener("DOMContentLoaded", () => {
     document.getElementById("apiKey").value = saved;
     document.getElementById("rememberKey").checked = true;
   }
-  showStep(0);
 });
 
 // ---------- Game state ----------
@@ -372,7 +386,7 @@ let state = null; // built on startGame(); see shape below
   state = {
     model, apiKey,
     setting, quest,
-    character: { name, desc, hp, maxHp },
+    character: { name, desc, hp, maxHp, cash, status: [string] },
     party: [{ name, role, hp, maxHp }],
     inventory: [string],
     history: [{ role: "user"|"assistant", content: string }],  // running transcript sent to the API
@@ -389,6 +403,7 @@ function startGame() {
     localStorage.removeItem(KEY_STORAGE);
   }
 
+  party = [];
   document.querySelectorAll(".party-row").forEach((row) => {
     const name = row.querySelector(".party-name").value.trim();
     const role = row.querySelector(".party-role").value.trim();
@@ -396,6 +411,7 @@ function startGame() {
   });
 
   const startHp = parseInt(fieldValue("startHp") || "20", 10);
+  const startCash = parseInt(fieldValue("startCash") || "20", 10);
   const startItems = fieldValue("startItems")
     .split(",")
     .map((s) => s.trim())
@@ -411,6 +427,8 @@ function startGame() {
       desc: fieldValue("charDesc"),
       hp: startHp,
       maxHp: startHp,
+      cash: isNaN(startCash) ? 0 : startCash,
+      status: [],
     },
     party,
     inventory: startItems,
@@ -421,6 +439,9 @@ function startGame() {
 
   document.getElementById("setup").hidden = true;
   document.getElementById("game").hidden = false;
+  document.getElementById("log").innerHTML = "";
+  document.getElementById("actionInput").disabled = false;
+  document.getElementById("sendBtn").disabled = false;
   renderDossier();
   saveSession();
 
@@ -445,14 +466,17 @@ ${recap}
 Rules for your narration:
 - Write vivid, concrete, second-person narration ("You..."), 120-220 words per turn.
 - Give the player real agency: end most turns with a situation that invites a choice, not a direct question.
-- Respect danger. Let actions fail or cost something when that's the honest outcome. Don't railroad; adapt to what the player actually tried.
-- Track consequences — injuries, items found or lost, party members hurt or helped — using the state block below.
+- Respect danger and money. Let actions fail or cost something when that's the honest outcome — including cash, when spending, being paid, gambling, bribing, or being robbed would realistically apply. Don't railroad; adapt to what the player actually tried.
+- Track consequences — injuries, items found or lost, cash gained or spent, status effects (like "soaked through", "concussed", "well-rested", "wanted by the harbour police") gained or resolved, party members hurt or helped — using the state block below.
 - Never resolve the whole quest in one turn. Pace it like a real campaign.
 
-After your narration, on its own final line, output exactly one machine-readable state block reflecting what changed THIS turn only (use 0 / empty values if nothing changed):
-<state>{"hp_delta": 0, "items_gained": [], "items_lost": [], "party_hp_deltas": {}, "quest_complete": false}</state>
+Immediately before the state block, on its own line, include one small illustration of the current scene as a flat, iconographic SVG — simple geometric shapes, no text inside it, viewBox="0 0 400 220", using only these hex colors: background/fill #E2D8BF or #EFE7D4, silhouette/linework #241F16, accent #C68A3E, danger #A23E2E, positive #5C7A5E. Keep it genuinely simple (a handful of shapes suggesting the scene — a silhouette, a horizon, an object) — not a detailed picture, and never include <script>, <foreignObject>, or any external references. Wrap it exactly like this:
+<illustration><svg viewBox="0 0 400 220" xmlns="http://www.w3.org/2000/svg">...</svg></illustration>
 
-Do not explain the state block or refer to it in the narration. Do not wrap it in markdown code fences.`;
+Then, on the final line, output exactly one machine-readable state block reflecting what changed THIS turn only (use 0 / empty / false values if nothing changed):
+<state>{"hp_delta": 0, "cash_delta": 0, "items_gained": [], "items_lost": [], "status_gained": [], "status_lost": [], "party_hp_deltas": {}, "quest_complete": false}</state>
+
+Do not explain the illustration or the state block, and do not refer to either in the narration itself.`;
 }
 
 function buildOpeningPrompt() {
@@ -465,7 +489,7 @@ async function requestTurn(playerActionText, opts = {}) {
   setBusy(true);
   hideGameError();
 
-  appendEntryForAction(playerActionText, opts.isOpening);
+  if (!opts.isOpening) appendEntry("player", playerActionText);
   state.history.push({ role: "user", content: playerActionText });
 
   const typingEl = appendTyping();
@@ -473,17 +497,17 @@ async function requestTurn(playerActionText, opts = {}) {
   try {
     const res = await callModel(state.history);
     const rawText = extractText(res);
-    const { narration, patch } = parseTurn(rawText);
+    const { narration, patch, illustration } = parseTurn(rawText);
 
     state.history.push({ role: "assistant", content: rawText });
 
     typingEl.remove();
-    appendEntry("gm", narration, patch);
+    appendEntry("gm", narration, patch, illustration);
     applyPatch(patch);
     renderDossier();
 
     if (patch.quest_complete) {
-      appendEntry("system", "— The quest concludes here. Start a new expedition to continue. —");
+      appendEntry("system", "— The quest concludes here. Start a new game to continue. —");
       document.getElementById("actionInput").disabled = true;
       document.getElementById("sendBtn").disabled = true;
     }
@@ -501,11 +525,7 @@ async function requestTurn(playerActionText, opts = {}) {
   }
 }
 
-function appendEntryForAction(playerActionText, isOpening) {
-  if (!isOpening) appendEntry("player", playerActionText);
-}
-
-async function callModel(messages, maxTokens = 700) {
+async function callModel(messages, maxTokens = 900) {
   const res = await fetch(ANTHROPIC_URL, {
     method: "POST",
     headers: {
@@ -537,28 +557,54 @@ function extractText(data) {
 }
 
 function parseTurn(rawText) {
-  const match = rawText.match(/<state>([\s\S]*?)<\/state>/);
-  let patch = { hp_delta: 0, items_gained: [], items_lost: [], party_hp_deltas: {}, quest_complete: false };
-  if (match) {
+  let text = rawText;
+
+  let illustration = null;
+  const illMatch = text.match(/<illustration>([\s\S]*?)<\/illustration>/);
+  if (illMatch) {
+    const svg = illMatch[1].trim();
+    if (/^<svg[\s\S]*<\/svg>$/i.test(svg) && !/<script/i.test(svg) && !/on\w+\s*=/i.test(svg)) {
+      illustration = svg;
+    }
+    text = text.replace(/<illustration>[\s\S]*?<\/illustration>/, "");
+  }
+
+  let patch = {
+    hp_delta: 0, cash_delta: 0, items_gained: [], items_lost: [],
+    status_gained: [], status_lost: [], party_hp_deltas: {}, quest_complete: false,
+  };
+  const stateMatch = text.match(/<state>([\s\S]*?)<\/state>/);
+  if (stateMatch) {
     try {
-      patch = { ...patch, ...JSON.parse(match[1]) };
+      patch = { ...patch, ...JSON.parse(stateMatch[1]) };
     } catch (e) {
       /* malformed state block — narration still shows, patch stays neutral */
     }
+    text = text.replace(/<state>[\s\S]*?<\/state>/, "");
   }
-  const narration = rawText.replace(/<state>[\s\S]*?<\/state>/, "").trim();
-  return { narration, patch };
+
+  return { narration: text.trim(), patch, illustration };
 }
 
 function applyPatch(patch) {
   if (patch.hp_delta) {
     state.character.hp = clamp(state.character.hp + patch.hp_delta, 0, state.character.maxHp);
   }
+  if (patch.cash_delta) {
+    state.character.cash = (state.character.cash || 0) + patch.cash_delta;
+  }
   (patch.items_gained || []).forEach((item) => {
     if (item && !state.inventory.includes(item)) state.inventory.push(item);
   });
   (patch.items_lost || []).forEach((item) => {
     state.inventory = state.inventory.filter((i) => i !== item);
+  });
+  state.character.status = state.character.status || [];
+  (patch.status_gained || []).forEach((s) => {
+    if (s && !state.character.status.includes(s)) state.character.status.push(s);
+  });
+  (patch.status_lost || []).forEach((s) => {
+    state.character.status = state.character.status.filter((x) => x !== s);
   });
   if (patch.party_hp_deltas) {
     Object.entries(patch.party_hp_deltas).forEach(([name, delta]) => {
@@ -589,10 +635,10 @@ async function maybeConsolidateHistory() {
       {
         role: "user",
         content:
-          "Pause the story. In under 150 words, third person, present tense, summarize everything that's happened in this adventure so far: where the player is now, what's happened to them and their party, what they're carrying, and any unresolved threads. Do not invent new events. Do not include a <state> block — plain prose only.",
+          "Pause the story. In under 120 words, third person, present tense, summarize everything that's happened in this adventure so far: where the player is now, what's happened to them and their party, what they're carrying and how much cash they have, any status effects, and any unresolved threads. Do not invent new events. Plain prose only — no illustration, no state block.",
       },
     ];
-    const res = await callModel(summaryReq, 300);
+    const res = await callModel(summaryReq, 260);
     const summaryText = extractText(res).trim();
     if (summaryText) {
       state.summary = state.summary ? `${state.summary}\n\n${summaryText}` : summaryText;
@@ -606,13 +652,20 @@ async function maybeConsolidateHistory() {
 
 // ---------- Rendering ----------
 
-function appendEntry(kind, text, patch) {
+function appendEntry(kind, text, patch, illustration) {
   const log = document.getElementById("log");
   const entry = document.createElement("div");
   entry.className = `entry entry-${kind}`;
 
   if (kind === "gm") {
+    if (illustration) {
+      const fig = document.createElement("div");
+      fig.className = "illustration";
+      fig.innerHTML = illustration;
+      entry.appendChild(fig);
+    }
     text.split(/\n{2,}/).forEach((para) => {
+      if (!para.trim()) return;
       const p = document.createElement("p");
       p.textContent = para;
       entry.appendChild(p);
@@ -642,8 +695,12 @@ function summarizePatch(patch) {
   const notes = [];
   if (patch.hp_delta > 0) notes.push({ type: "gain", text: `+${patch.hp_delta} HP` });
   if (patch.hp_delta < 0) notes.push({ type: "loss", text: `${patch.hp_delta} HP` });
+  if (patch.cash_delta > 0) notes.push({ type: "gain", text: `+${patch.cash_delta} cash` });
+  if (patch.cash_delta < 0) notes.push({ type: "loss", text: `${patch.cash_delta} cash` });
   (patch.items_gained || []).forEach((i) => notes.push({ type: "gain", text: `+ ${i}` }));
   (patch.items_lost || []).forEach((i) => notes.push({ type: "loss", text: `− ${i}` }));
+  (patch.status_gained || []).forEach((s) => notes.push({ type: "loss", text: `+ ${s}` }));
+  (patch.status_lost || []).forEach((s) => notes.push({ type: "gain", text: `resolved: ${s}` }));
   Object.entries(patch.party_hp_deltas || {}).forEach(([name, d]) => {
     if (d) notes.push({ type: d > 0 ? "gain" : "loss", text: `${name} ${d > 0 ? "+" : ""}${d} HP` });
   });
@@ -669,6 +726,16 @@ function renderDossier() {
   fill.style.width = pct + "%";
   fill.className = "hp-fill" + (pct <= 25 ? " danger" : pct <= 55 ? " warn" : "");
   document.getElementById("hpText").textContent = `${state.character.hp} / ${state.character.maxHp}`;
+
+  document.getElementById("cashText").textContent = `${state.character.cash ?? 0}`;
+
+  const statusList = document.getElementById("statusList");
+  statusList.innerHTML = "";
+  (state.character.status || []).forEach((s) => {
+    const li = document.createElement("li");
+    li.textContent = s;
+    statusList.appendChild(li);
+  });
 
   const roster = document.getElementById("partyRoster");
   roster.innerHTML = "";
@@ -719,10 +786,10 @@ document.getElementById("actionForm").addEventListener("submit", (e) => {
   requestTurn(text);
 });
 
-document.getElementById("restartBtn").addEventListener("click", () => {
-  if (!confirm("End this expedition? Your progress here will be cleared.")) return;
+document.getElementById("newGameBtn").addEventListener("click", () => {
+  if (!confirm("Start a new game? This one will be cleared.")) return;
   localStorage.removeItem(STORAGE_KEY);
-  location.reload();
+  quickStart(Math.random() < 0.5 ? "adventure" : "life");
 });
 
 // ---------- Session persistence (survive a refresh) ----------
@@ -743,6 +810,9 @@ function tryRestoreSession() {
   } catch (e) {
     return false;
   }
+  state.character.status = state.character.status || [];
+  state.character.cash = state.character.cash ?? 0;
+
   document.getElementById("setup").hidden = true;
   document.getElementById("game").hidden = false;
   renderDossier();
@@ -754,17 +824,16 @@ function tryRestoreSession() {
   }
   (state.history || []).forEach((turn) => {
     if (turn.role === "user") {
-      // skip re-rendering the opening prompt itself
       if (turn.content.startsWith("Begin the adventure")) return;
       appendEntry("player", turn.content);
     } else {
-      const { narration } = parseTurn(turn.content);
-      appendEntry("gm", narration);
+      const { narration, illustration } = parseTurn(turn.content);
+      appendEntry("gm", narration, null, illustration);
     }
   });
   return true;
 }
 
 if (!tryRestoreSession()) {
-  // setup wizard already visible by default
+  // setup screen already visible by default
 }
