@@ -433,7 +433,7 @@ function startGame() {
     party,
     inventory: startItems,
     history: [],
-    summary: "",
+    summaryChunks: [], // array of arrays — each consolidation adds one chunk of 4-5 short bullets
     playerTurnCount: 0,
   };
 
@@ -448,9 +448,15 @@ function startGame() {
   requestTurn(buildOpeningPrompt(), { isOpening: true });
 }
 
+function flattenSummaryBullets(maxBullets = 20) {
+  const all = (state.summaryChunks || []).flat();
+  return all.slice(Math.max(0, all.length - maxBullets));
+}
+
 function buildSystemPrompt() {
-  const recap = state.summary
-    ? `\nSTORY SO FAR (condensed recap of everything before the messages below — treat it as established fact, don't re-narrate it): ${state.summary}\n`
+  const bullets = flattenSummaryBullets();
+  const recap = bullets.length
+    ? `\nSTORY SO FAR (condensed recap of everything before the messages below — treat it as established fact, don't re-narrate it):\n${bullets.map((b) => `- ${b}`).join("\n")}\n`
     : "";
 
   return `You are the game master for a solo text adventure called "Waybook". Stay fully in character as narrator — never break the fiction, never mention that you are an AI.
@@ -485,11 +491,18 @@ function buildOpeningPrompt() {
 
 // ---------- API calls ----------
 
+const CONTINUE_PROMPT =
+  "The player takes no specific action right now and lets the moment pass. Continue the story from here: advance the scene, move things toward the next development or phase of the quest, and give a new concrete situation to respond to. Don't decide a new explicit action on the player's behalf.";
+
 async function requestTurn(playerActionText, opts = {}) {
   setBusy(true);
   hideGameError();
 
-  if (!opts.isOpening) appendEntry("player", playerActionText);
+  if (opts.isContinue) {
+    appendEntry("continue", "");
+  } else if (!opts.isOpening) {
+    appendEntry("player", playerActionText);
+  }
   state.history.push({ role: "user", content: playerActionText });
 
   const typingEl = appendTyping();
@@ -635,19 +648,82 @@ async function maybeConsolidateHistory() {
       {
         role: "user",
         content:
-          "Pause the story. In under 120 words, third person, present tense, summarize everything that's happened in this adventure so far: where the player is now, what's happened to them and their party, what they're carrying and how much cash they have, any status effects, and any unresolved threads. Do not invent new events. Plain prose only — no illustration, no state block.",
+          "Pause the story. Summarize everything that's happened in this adventure so far as exactly 4 or 5 short bullet points (each one line, under 12 words, no leading dash or bullet character — just the line itself). Cover: where the player is now, the key thing that's happened, what they're carrying/how much cash, and any unresolved thread or status effect worth remembering. Do not invent new events. One bullet per line, nothing else — no intro, no prose, no illustration, no state block.",
       },
     ];
-    const res = await callModel(summaryReq, 260);
-    const summaryText = extractText(res).trim();
-    if (summaryText) {
-      state.summary = state.summary ? `${state.summary}\n\n${summaryText}` : summaryText;
+    const res = await callModel(summaryReq, 200);
+    const raw = extractText(res).trim();
+    const bullets = raw
+      .split("\n")
+      .map((l) => l.replace(/^[\s*•\-–]+/, "").trim())
+      .filter(Boolean)
+      .slice(0, 5);
+
+    if (bullets.length) {
+      state.summaryChunks = state.summaryChunks || [];
+      state.summaryChunks.push(bullets);
       state.history = [];
-      appendEntry("system", "— story so far condensed to keep things running smoothly —");
+      renderStorySoFar();
     }
   } catch (e) {
     /* consolidation is best-effort — if it fails, the transcript just keeps growing normally */
   }
+}
+
+// ---------- "Story so far" panel — latest chunk visible, older chunks behind "See more" ----------
+
+function renderStorySoFar() {
+  const chunks = state.summaryChunks || [];
+  if (!chunks.length) return;
+
+  const existing = document.getElementById("storySoFar");
+  if (existing) existing.remove();
+
+  const latest = chunks[chunks.length - 1];
+  const older = chunks.slice(0, -1).flat();
+
+  const box = document.createElement("div");
+  box.id = "storySoFar";
+  box.className = "story-so-far";
+
+  const label = document.createElement("span");
+  label.className = "story-so-far-label";
+  label.textContent = "Story so far";
+  box.appendChild(label);
+
+  const list = document.createElement("ul");
+  latest.forEach((b) => {
+    const li = document.createElement("li");
+    li.textContent = b;
+    list.appendChild(li);
+  });
+  box.appendChild(list);
+
+  if (older.length) {
+    const moreList = document.createElement("ul");
+    moreList.hidden = true;
+    older.forEach((b) => {
+      const li = document.createElement("li");
+      li.textContent = b;
+      moreList.appendChild(li);
+    });
+
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "story-see-more";
+    toggle.textContent = `See more (${older.length})`;
+    toggle.addEventListener("click", () => {
+      moreList.hidden = !moreList.hidden;
+      toggle.textContent = moreList.hidden ? `See more (${older.length})` : "See less";
+    });
+
+    box.appendChild(toggle);
+    box.appendChild(moreList);
+  }
+
+  const log = document.getElementById("log");
+  log.appendChild(box);
+  log.scrollTop = log.scrollHeight;
 }
 
 // ---------- Rendering ----------
@@ -683,6 +759,8 @@ function appendEntry(kind, text, patch, illustration) {
     const p = document.createElement("p");
     p.textContent = "→ " + text;
     entry.appendChild(p);
+  } else if (kind === "continue") {
+    entry.textContent = "⏭ continuing…";
   } else {
     entry.textContent = text;
   }
@@ -764,6 +842,7 @@ function setBusy(busy) {
   document.getElementById("actionInput").disabled = busy;
   document.getElementById("sendBtn").disabled = busy;
   document.getElementById("sendBtn").textContent = busy ? "…" : "Act";
+  document.getElementById("continueBtn").disabled = busy;
 }
 
 function showGameError(msg) {
@@ -784,6 +863,11 @@ document.getElementById("actionForm").addEventListener("submit", (e) => {
   if (!text || !state) return;
   input.value = "";
   requestTurn(text);
+});
+
+document.getElementById("continueBtn").addEventListener("click", () => {
+  if (!state) return;
+  requestTurn(CONTINUE_PROMPT, { isContinue: true });
 });
 
 document.getElementById("newGameBtn").addEventListener("click", () => {
@@ -812,6 +896,11 @@ function tryRestoreSession() {
   }
   state.character.status = state.character.status || [];
   state.character.cash = state.character.cash ?? 0;
+  if (!state.summaryChunks && typeof state.summary === "string" && state.summary) {
+    // migrate an older save's single prose summary into the new bullet format
+    state.summaryChunks = [state.summary.split(/\n+/).map((s) => s.trim()).filter(Boolean)];
+  }
+  state.summaryChunks = state.summaryChunks || [];
 
   document.getElementById("setup").hidden = true;
   document.getElementById("game").hidden = false;
@@ -819,12 +908,14 @@ function tryRestoreSession() {
 
   const log = document.getElementById("log");
   log.innerHTML = "";
-  if (state.summary) {
-    appendEntry("system", "— story so far — " + state.summary);
-  }
+  renderStorySoFar();
   (state.history || []).forEach((turn) => {
     if (turn.role === "user") {
       if (turn.content.startsWith("Begin the adventure")) return;
+      if (turn.content === CONTINUE_PROMPT) {
+        appendEntry("continue", "");
+        return;
+      }
       appendEntry("player", turn.content);
     } else {
       const { narration, illustration } = parseTurn(turn.content);
