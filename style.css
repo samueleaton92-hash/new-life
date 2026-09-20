@@ -11,7 +11,7 @@
    Type:
      Fraunces  — display serif, headings, the "voice of the GM"
      Inter     — UI chrome, body, controls
-     JetBrains Mono — numeric readouts only (HP, counts) — functional, not decorative
+     JetBrains Mono — numeric readouts only (HP, cash, counts)
    =========================================================== */
 
 :root {
@@ -25,6 +25,8 @@
   --lantern-dim: #8F6530;
   --rust: #A23E2E;
   --moss: #5C7A5E;
+  --life-accent: #8FB6B7;
+  --life-accent-dim: #4E6F70;
 }
 
 * { box-sizing: border-box; }
@@ -62,7 +64,7 @@ button {
   * { animation: none !important; transition: none !important; }
 }
 
-/* ---------------- Setup wizard ---------------- */
+/* ---------------- Setup ---------------- */
 
 .setup {
   min-height: 100vh;
@@ -95,70 +97,52 @@ button {
 }
 
 .setup-sub {
-  margin: 0 0 18px;
+  margin: 0 0 24px;
   color: #9DA8AA;
   font-size: 14.5px;
 }
 
-.randomize-row {
+.quickstart-row {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  gap: 10px;
+  margin-top: 22px;
   margin-bottom: 10px;
 }
 
-.randomize-btn {
+.quickstart-btn {
+  flex: 1;
+  text-align: center;
+}
+.quickstart-btn.life-btn {
+  background: var(--life-accent-dim);
+  border-color: var(--life-accent-dim);
+  color: #E9F3F3;
+}
+.quickstart-btn.life-btn:hover {
+  background: #5E8283;
+}
+
+.text-link-btn {
   display: block;
   width: 100%;
-  background: transparent;
-  border: 1px dashed var(--lantern-dim);
-  color: var(--lantern);
-  padding: 11px 14px;
-  border-radius: 4px;
-  font-size: 13.5px;
-  font-weight: 600;
-  transition: background 0.15s ease, border-color 0.15s ease;
-}
-.randomize-btn:hover {
-  background: rgba(198, 138, 62, 0.08);
-  border-color: var(--lantern);
-}
-.randomize-btn.life-btn {
-  border-color: #4E6F70;
-  color: #8FB6B7;
-}
-.randomize-btn.life-btn:hover {
-  background: rgba(79, 111, 112, 0.12);
-  border-color: #8FB6B7;
-}
-
-.randomize-note {
+  text-align: center;
+  background: none;
+  border: none;
+  color: #7E8A8C;
   font-size: 12.5px;
-  color: var(--moss);
-  margin: 0 0 22px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding: 6px;
 }
+.text-link-btn:hover { color: var(--paper); }
 
-.step { animation: fadeIn 0.3s ease; }
+.customize-form {
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top: 1px solid var(--ink-border);
+  animation: fadeIn 0.25s ease;
+}
 @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
-
-.setup-steps {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 28px;
-}
-
-.setup-steps .dot {
-  height: 3px;
-  flex: 1;
-  background: var(--ink-border);
-  border-radius: 2px;
-  transition: background 0.25s ease;
-}
-
-.setup-steps .dot.done,
-.setup-steps .dot.active {
-  background: var(--lantern);
-}
 
 .field {
   display: block;
@@ -223,6 +207,7 @@ select {
 .field-check input { margin-top: 3px; }
 
 .two-col { display: grid; grid-template-columns: 1fr; gap: 14px; }
+.three-col { grid-template-columns: 1fr 1fr; }
 
 .chip-row {
   display: flex;
@@ -299,19 +284,12 @@ select {
 .primary-btn:hover { background: #D69B4E; }
 .primary-btn:disabled { opacity: 0.55; cursor: default; }
 
-.setup-nav {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 6px;
-}
-.setup-nav .primary-btn { margin-left: auto; }
+#beginCustomBtn { width: 100%; margin-top: 6px; }
 
 .setup-error {
   color: var(--rust);
   font-size: 13px;
-  margin-top: 14px;
-  margin-bottom: 0;
+  margin: 14px 0 0;
 }
 
 /* ---------------- Game screen ---------------- */
@@ -345,7 +323,7 @@ select {
   color: var(--paper);
 }
 
-.stat-block { margin: 22px 0 26px; }
+.stat-block { margin: 22px 0 26px; display: flex; flex-direction: column; gap: 10px; }
 
 .stat-row {
   display: flex;
@@ -357,7 +335,7 @@ select {
   font-size: 12.5px;
   font-weight: 500;
   color: #9DA8AA;
-  width: 26px;
+  width: 32px;
 }
 
 .hp-track {
@@ -385,10 +363,11 @@ select {
   min-width: 46px;
   text-align: right;
 }
+.cash-value { flex: 1; text-align: left; }
 
 .dossier-section { margin-bottom: 24px; }
 
-.roster, .inventory-list {
+.roster, .inventory-list, .status-list {
   list-style: none;
   margin: 10px 0 0;
   padding: 0;
@@ -407,7 +386,7 @@ select {
 .roster li .role { color: #7E8A8C; font-size: 12px; }
 .roster li .php { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #9DA8AA; }
 
-.inventory-list li {
+.inventory-list li, .status-list li {
   font-size: 13.5px;
   color: var(--paper);
   padding-left: 14px;
@@ -419,7 +398,16 @@ select {
   left: 0;
   color: var(--lantern);
 }
-.inventory-list:empty::after {
+.status-list li::before {
+  content: "◆";
+  font-size: 8px;
+  position: absolute;
+  left: 0;
+  top: 4px;
+  color: var(--rust);
+}
+.inventory-list:empty::after,
+.status-list:empty::after {
   content: "Nothing yet.";
   color: #5A6668;
   font-size: 13px;
@@ -454,6 +442,20 @@ select {
 .entry {
   max-width: 640px;
   margin: 0 auto 28px;
+}
+
+.illustration {
+  margin: 0 0 16px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--paper-dim);
+  background: var(--paper-dim);
+  line-height: 0;
+}
+.illustration svg {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 .entry-gm p {
@@ -546,7 +548,7 @@ select {
 
 @media (max-width: 760px) {
   .game { grid-template-columns: 1fr; grid-template-rows: auto 1fr; height: 100dvh; }
-  .dossier { flex-direction: row; flex-wrap: wrap; border-right: none; border-bottom: 1px solid var(--ink-border); padding: 16px 18px; max-height: 40vh; }
+  .dossier { flex-direction: row; flex-wrap: wrap; border-right: none; border-bottom: 1px solid var(--ink-border); padding: 16px 18px; max-height: 44vh; }
   .dossier-head { width: 100%; }
   .stat-block { width: 100%; margin: 12px 0; }
   .dossier-section { flex: 1 1 45%; margin-bottom: 12px; }
@@ -554,4 +556,5 @@ select {
   .journal-log { padding: 24px 18px 14px; }
   .journal-input { padding: 12px 18px 16px; }
   .journal-error { padding: 0 18px 12px; }
+  .quickstart-row { flex-direction: column; }
 }
