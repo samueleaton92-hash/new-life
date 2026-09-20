@@ -329,6 +329,9 @@ select {
   color: var(--paper);
 }
 
+.dossier-toggle-btn,
+.dossier-summary { display: none; }
+
 .stat-block { margin: 22px 0 26px; display: flex; flex-direction: column; gap: 10px; }
 
 .stat-row {
@@ -487,13 +490,16 @@ select {
   border: 1px solid #D6C9A6;
   border-radius: 6px;
 }
-.story-so-far-label {
+.story-so-far summary {
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
   letter-spacing: 0.06em;
   color: var(--lantern-dim);
   text-transform: uppercase;
+  cursor: pointer;
 }
+.story-so-far summary::marker { color: var(--lantern-dim); }
+.story-so-far[open] summary { margin-bottom: 8px; }
 .story-so-far ul {
   margin: 8px 0 0;
   padding-left: 18px;
@@ -504,18 +510,18 @@ select {
   line-height: 1.5;
   margin-bottom: 3px;
 }
-.story-see-more {
-  display: block;
-  margin-top: 8px;
-  background: none;
-  border: none;
-  padding: 0;
+.story-earlier {
+  margin-top: 10px;
+}
+.story-earlier summary {
+  font-size: 12px;
   color: var(--lantern-dim);
-  font-size: 12.5px;
+  cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
-.story-see-more:hover { color: var(--lantern); }
+.story-earlier ul { margin-top: 6px; }
+.story-earlier li { color: #5A5340; }
 
 .entry-system {
   font-family: 'JetBrains Mono', monospace;
@@ -608,11 +614,52 @@ select {
 
 @media (max-width: 760px) {
   .game { grid-template-columns: 1fr; grid-template-rows: auto 1fr; height: 100dvh; }
-  .dossier { flex-direction: row; flex-wrap: wrap; border-right: none; border-bottom: 1px solid var(--ink-border); padding: 16px 18px; max-height: 44vh; }
-  .dossier-head { width: 100%; }
-  .stat-block { width: 100%; margin: 12px 0; }
-  .dossier-section { flex: 1 1 45%; margin-bottom: 12px; }
-  .small { margin-top: 12px; }
+
+  .dossier {
+    flex-direction: column;
+    border-right: none;
+    border-bottom: 1px solid var(--ink-border);
+    padding: 14px 18px;
+    max-height: none;
+    overflow-y: visible;
+  }
+  .dossier-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+  .dossier-toggle-btn {
+    display: inline-block;
+    background: transparent;
+    border: 1px solid var(--ink-border);
+    color: var(--paper);
+    font-size: 12.5px;
+    padding: 7px 12px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  .dossier-summary {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    color: #9DA8AA;
+  }
+  .dossier-summary .dot { color: var(--ink-border); }
+
+  .dossier-body {
+    display: none;
+    margin-top: 16px;
+    max-height: 50vh;
+    overflow-y: auto;
+  }
+  .dossier.expanded .dossier-body { display: block; }
+
+  .stat-block { width: 100%; margin: 0 0 20px; }
+  .dossier-section { margin-bottom: 18px; }
+  .small { margin-top: 6px; }
   .journal-log { padding: 24px 18px 14px; }
   .journal-input { padding: 12px 18px 16px; flex-wrap: wrap; }
   .journal-input input { flex: 1 1 100%; }
