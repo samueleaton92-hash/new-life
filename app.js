@@ -7,8 +7,9 @@
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 const STORAGE_KEY = "waybook_session_v1";
 const KEY_STORAGE = "waybook_api_key";
+const CONSOLIDATE_EVERY = 3; // summarize the running transcript after this many player turns
 
-// ---------- Random story seeds (UK & Australia) ----------
+// ---------- Random adventure seeds (UK & Australia) ----------
 
 const RANDOM_SEEDS = [
   {
@@ -17,91 +18,59 @@ const RANDOM_SEEDS = [
     charName: "Rowan Ashcombe",
     charDesc: "A maritime archivist on sabbatical, more comfortable with shipping ledgers than people, who came to Whitby chasing a footnote about the missing bell and found the tide had other plans.",
     quest: "Find out what really happened to the church bell in 1901, and what's been keeping the tunnel mouth sealed ever since.",
-    startItems: "oil lantern, tide table, a rubbing of a worn inscription",
+    startItems: "brass lantern, tide almanac, a rubbing of the bell's old inscription",
   },
   {
     region: "UK",
-    setting: "A disused London Underground station, sealed since the Blitz, that a night-shift maintenance contract has just reopened for a structural survey — and the survey team keeps finding things that shouldn't still be down there.",
-    charName: "Priya Nandwani",
-    charDesc: "A structural engineer's assistant working her first solo night contract, methodical to a fault, who signed up for concrete readings and not much else.",
-    quest: "Complete the survey — and work out who, or what, has been leaving fresh chalk marks on eighty-year-old platform tiles.",
-    startItems: "hard hat torch, survey clipboard, a spare Oyster card",
+    setting: "A crumbling manor on the Norfolk Fens, cut off by floodwater for the third winter running, where the tenant farmers swear something walks the causeway when the mist comes in.",
+    charName: "Edith Marlowe",
+    charDesc: "A folklore collector sent by a university that stopped funding her a year ago, still finishing the job on her own coin.",
+    quest: "Record what's really happening on the causeway before the last farming family gives up the tenancy for good.",
+    startItems: "wax cylinder recorder, oilskin notebook, a borrowed shotgun she's never fired",
   },
   {
     region: "UK",
-    setting: "A single-track road in the Scottish Highlands, deep in a glen where a hillwalker vanished twenty years ago and was never found — until this week, when a shepherd found her boots on a ridge that hadn't been searched.",
-    charName: "Euan Fraser",
-    charDesc: "A mountain rescue volunteer who was on the original search two decades ago and has never quite let it go, back in the glen on his own time.",
-    quest: "Follow the boots to whatever's left to find, and finally close the file on the walker who disappeared.",
-    startItems: "OS map, headtorch, a photograph of the missing walker",
+    setting: "A Welsh mining valley the year after the pit closed, where the old union hall has been quietly reopened by someone nobody in the village will name.",
+    charName: "Gethin Pryce",
+    charDesc: "A laid-off surveyor who knows the tunnels under the valley better than anyone left alive, and owes the wrong person a favour.",
+    quest: "Find out who reopened the union hall, and what they're using the old shafts for.",
+    startItems: "pit lamp, hand-drawn tunnel survey, a union card that shouldn't still be valid",
   },
   {
     region: "UK",
-    setting: "A Welsh valley town built entirely around a colliery that closed thirty years ago, where the last two miles of tunnel were never mapped before they were sealed — and a subsidence survey has just cracked one open.",
-    charName: "Bethan Pryce",
-    charDesc: "A local council surveyor and the granddaughter of a man who never came up from the 1974 flood in that same shaft, sent to assess the new crack alone.",
-    quest: "Get eyes on what's behind the subsidence before the council orders it resealed for good, and find out if the 1974 flood victims are really where the record says.",
-    startItems: "gas monitor, hand-drawn family map of the old workings, work gloves",
+    setting: "The Scottish Highlands during a stalking season gone wrong, where the estate's gamekeeper has vanished and the deer count doesn't add up.",
+    charName: "Isla Fenwick",
+    charDesc: "An apprentice stalker three seasons in, trusted with the rifle but not yet the secrets of the estate.",
+    quest: "Find the missing gamekeeper before the estate's owner brings in outside help who won't ask the right questions.",
+    startItems: "stalking rifle, estate map, a torn page from the gamekeeper's log",
   },
   {
     region: "UK",
-    setting: "A tin-streaming coastline in Cornwall where erosion has just exposed the timber ribs of a wreck no local record accounts for, on a stretch of beach still known locally as Wreckers' Reach.",
-    charName: "Demelza Trewin",
-    charDesc: "A maritime archaeology postgrad, broke and behind on her thesis, who's supposed to be surveying kelp beds and can't stop thinking about the wreck instead.",
-    quest: "Identify the wreck before the tide reburies it, and find out why nobody wanted it found the first time.",
-    startItems: "trowel and brush kit, waterproof notebook, a borrowed metal detector",
+    setting: "A 1920s smuggler's port on the Cornish coast, run by three rival families and one harbourmaster nobody has managed to buy.",
+    charName: "Constance Trelawny",
+    charDesc: "The harbourmaster's estranged daughter, back in town for a funeral and immediately mistaken for someone with far more leverage than she has.",
+    quest: "Work out which family is behind the missing excise ledgers before the harbourmaster's death is ruled anything but natural.",
+    startItems: "harbour keys, a ledger page torn free, a revolver that isn't loaded",
   },
   {
     region: "UK",
-    setting: "The sealed underground vaults beneath Edinburgh's Old Town, opened for one night to a heritage trust survey team, on the anniversary of a fire that supposedly killed everyone trapped down there in 1824.",
-    charName: "Cammie Wark",
-    charDesc: "A heritage trust intern doing unpaid hours for the CV line, armed with a torch and a laminated fact-sheet she doesn't fully believe.",
-    quest: "Document the vaults for the trust's file — and find out whether the 1824 fire really killed everyone the record says it did.",
-    startItems: "site torch, laminated vault map, walkie-talkie with a dying battery",
+    setting: "An English cathedral city in the last week before a controversial restoration begins, when a mason's mark turns up in the crypt matching no known guild.",
+    charName: "Peter Holloway",
+    charDesc: "A conservation architect whose entire career is riding on this restoration going smoothly, which it is now very much not doing.",
+    quest: "Identify the mark before the restoration board decides it's easier to simply plaster over the crypt.",
+    startItems: "rubbing kit, cathedral floor plans, a set of borrowed crypt keys",
   },
   {
     region: "UK",
-    setting: "A wet October in the Norfolk Fens, flat as a tabletop to the horizon, where a birdwatcher went out to the reed beds three days ago and hasn't been seen since — and the locals keep mentioning the old story of the Fen Tiger without quite laughing it off.",
-    charName: "Ottilie Vance",
-    charDesc: "A wildlife trust ranger who knows the reed beds better than anyone alive, called in when the search dogs lost the scent at the water's edge.",
-    quest: "Find the missing birdwatcher before the weather turns, and decide for yourself what the Fen Tiger story is really about.",
-    startItems: "waders, dog whistle, ordnance map of the fen channels",
+    setting: "A London Underground station, closed since the Blitz, that maintenance crews insist keeps reappearing on their tunnel maps despite being formally sealed decades ago.",
+    charName: "Nadia Okonkwo",
+    charDesc: "A transport authority engineer sent to close out a paperwork anomaly, who did not sign up for what she found in the ventilation shaft.",
+    quest: "Work out why the station keeps showing up on the maps, and what's using it, before the anomaly reaches head office.",
+    startItems: "hard hat with headlamp, 1940s station schematic, a two-way radio with patchy signal",
   },
   {
     region: "Australia",
-    setting: "An underground opal-mining town in the South Australian outback, where half the population lives below ground to escape the heat, and a rival claim dispute has just turned up a tunnel nobody registered.",
-    charName: "Casey Mullane",
-    charDesc: "A third-generation opal miner running her late father's claim on a shoestring, sharp-tongued and out of patience with the neighbouring claim's lawyers.",
-    quest: "Work out who dug the unregistered tunnel and what it connects to before the dispute turns into something worse.",
-    startItems: "miner's headlamp, hand pick, a folder of claim paperwork",
-  },
-  {
-    region: "Australia",
-    setting: "Old-growth wilderness in Tasmania, where a bushwalker went off-track eleven days ago near the ruins of a convict-era timber station that the maps still mark as unsurveyed.",
-    charName: "Jarrah Coates",
-    charDesc: "A Parks and Wildlife field officer, quiet and exacting, assigned the search after the volunteer parties turned back at the ruins.",
-    quest: "Find the missing bushwalker, and find out why three separate search parties have all turned back at exactly the same ridge.",
-    startItems: "topographic map, satellite phone, trail rations",
-  },
-  {
-    region: "Australia",
-    setting: "A remote research station on a Top End waterway in the Northern Territory, croc country, where a colleague's boat was found drifting empty two mornings ago with the outboard still running.",
-    charName: "Nell Yunupingu-Barrett",
-    charDesc: "A wetlands ecologist on a six-month posting, the only one on the team who actually grew up reading this particular stretch of water.",
-    quest: "Work out what happened to the missing colleague before the wet season closes the station's only road out.",
-    startItems: "two-way radio, tide chart, a battered pair of binoculars",
-  },
-  {
-    region: "Australia",
-    setting: "Sydney Harbour after dark, where a decommissioned naval tunnel under Cockatoo Island has been reopened for heritage tours — and the harbourmaster's office has just quietly reported a container gone missing from the wrong side of a locked gate.",
-    charName: "Theo Marchetti",
-    charDesc: "A former customs officer now working harbour heritage security, still sharper than the job strictly requires, and annoyed at being taken off real cases for tour-guide duty.",
-    quest: "Find the missing container and work out who had gate access before the harbourmaster's office buries the whole thing.",
-    startItems: "site access badge, torch, a printed manifest with one line crossed out",
-  },
-  {
-    region: "Australia",
-    setting: "A near-abandoned goldfields town in Western Australia, kept alive by one pub and a skeleton population, where a decades-dry mine shaft has just started flooding from a source nobody can locate.",
+    setting: "A mining claim in the Western Australian outback where the water table has started behaving like nothing the old survey charts predicted.",
     charName: "Reg Halloran",
     charDesc: "The town's last licensed prospector, more used to reading rock than people, roped into helping the shire council figure out where the water's coming from.",
     quest: "Trace the flooding to its source before it swallows what's left of the old workings — and the town's water table with it.",
@@ -123,6 +92,38 @@ const RANDOM_SEEDS = [
     quest: "Find the missing ledger — and the club owner — before whoever wants it back stops asking nicely.",
     startItems: "notebook and pencil, a spare set of skeleton keys, half a packet of cigarettes",
   },
+  {
+    region: "Australia",
+    setting: "A remote sheep station in outback Queensland during the worst drought in a generation, where the station's bore water has started tasting of something nobody can name.",
+    charName: "Bel Carrington",
+    charDesc: "The station manager's daughter, home from agricultural college to help keep the place afloat, unwilling to admit how bad the season has actually gotten.",
+    quest: "Work out what's fouling the bore before the last of the stock has to be sold off.",
+    startItems: "water test kit, station ledger, ute keys",
+  },
+  {
+    region: "Australia",
+    setting: "A wilderness airstrip in Tasmania's south-west, weathered in for the third day running, where a bushwalking group radioed for help and then stopped answering entirely.",
+    charName: "Ollie Tran",
+    charDesc: "A volunteer search-and-rescue pilot with more hours flying this coastline than anyone else on the roster, grounded until the weather breaks.",
+    quest: "Find the missing bushwalking group before the weather window closes for good.",
+    startItems: "topographic map, emergency beacon receiver, a thermos that's gone cold",
+  },
+  {
+    region: "Australia",
+    setting: "A heritage pearling lugger moored off Broome at the start of the wet season, where the crew has found something in an oyster shell that isn't a pearl.",
+    charName: "Yindi Walsh",
+    charDesc: "A third-generation pearling deckhand who knows this water better than the charts do, and doesn't trust what just came up in the dredge.",
+    quest: "Identify what's inside the shell before the lugger's owner decides to sell it to the first buyer who asks no questions.",
+    startItems: "oyster knife, tide chart, a hessian sack with something heavy in it",
+  },
+  {
+    region: "Australia",
+    setting: "A gold-rush ghost town in regional Victoria, reopened as a heritage tourist site, where the restoration crew keeps finding the same grave freshly disturbed no matter how many times they fill it in.",
+    charName: "Callum Reeve",
+    charDesc: "A heritage-site caretaker two seasons into the job, whose predecessor left without giving notice or much of an explanation.",
+    quest: "Work out who — or what — keeps disturbing the grave before the heritage trust pulls the site's funding over it.",
+    startItems: "site keys, caretaker's logbook, a shovel that's seen too much use this month",
+  },
 ];
 
 function applyRandomSeed() {
@@ -139,6 +140,109 @@ function applyRandomSeed() {
 }
 
 document.getElementById("randomizeBtn").addEventListener("click", applyRandomSeed);
+
+// ---------- "Life at 18" randomizer — real UK/Australia years, 1992-2026 ----------
+
+// Era buckets give period-accurate flavour. Bucketed by decade-ish span,
+// each with a UK detail, an Australia detail, and a short list of items
+// an 18-year-old plausibly has on them that year.
+const LIFE_ERAS = [
+  {
+    from: 1992, to: 1994,
+    uk: "the last recession-shadowed years before Britpop breaks, Ceefax still the fastest way to check the football scores, and a landline is the only way anyone's reaching you tonight",
+    au: "the tail end of a deep recession, cricket on the radio in the kitchen, and STD phone booths still doing steady trade outside the milk bar",
+    items: "a Walkman with one good pair of headphones, a library card, a fiver that has to last the week",
+  },
+  {
+    from: 1995, to: 1999,
+    uk: "Britpop on every radio, a family computer that ties up the phone line whenever anyone dials up the internet, and a pager that only ever seems to go off at the worst moment",
+    au: "the last summer before mobile phones are properly common, a share house with a shared dial-up connection, and cricket on in the background of everything",
+    items: "a mixtape three friends contributed to, a pager, a crumpled TAB or bus ticket",
+  },
+  {
+    from: 2000, to: 2004,
+    uk: "the flat, uncertain years right after Y2K turned out to be nothing, a Nokia everyone can text on but nobody can afford to call from, and MSN Messenger as the real social life",
+    au: "the Sydney Olympics still fresh in everyone's memory, a Nokia brick phone with a battery that lasts a week, and dial-up finally giving way to something faster",
+    items: "a Nokia handset, a CD wallet, an EFTPOS card that's usually declined",
+  },
+  {
+    from: 2005, to: 2008,
+    uk: "MySpace giving way to Facebook, an iPod everyone's jealous of, and a part-time job that pays for a mobile plan and not much else",
+    au: "the tail end of the mining boom's good mood, a first-gen Facebook account, and a P-plate stuck on the back of a car that's only sometimes reliable",
+    items: "an iPod with a cracked screen protector, a set of house keys on a lanyard, a P-plate",
+  },
+  {
+    from: 2009, to: 2012,
+    uk: "the country still climbing out of the financial crisis, a first smartphone that's really just for texting and Facebook, and university fees that just went up and everyone's furious about it",
+    au: "the aftermath of the GFC felt mostly through the news, a first smartphone with a data plan nobody quite understands, and a gap-year backpacking trip everyone's saving for",
+    items: "an early smartphone, a student card, a half-finished job application",
+  },
+  {
+    from: 2013, to: 2016,
+    uk: "Instagram replacing Facebook as the thing that matters, zero-hour contracts as the going rate for a first job, and a referendum argument that's about to split every family dinner",
+    au: "Instagram and share-house group chats, a casual hospitality job that never quite gives enough shifts, and a Centrelink queue that eats half a Tuesday",
+    items: "a smartphone permanently at 20% battery, a share-house key, a payslip that's shorter than expected",
+  },
+  {
+    from: 2017, to: 2019,
+    uk: "gig-economy work as the default first job, a group chat that never stops buzzing, and a housing market that makes moving out feel like a joke",
+    au: "gig-economy delivery work between uni units, a group chat that never stops buzzing, and share-house rent that keeps climbing every lease renewal",
+    items: "a phone full of unread group-chat messages, a delivery-app login, a reusable coffee cup that's never actually washed",
+  },
+  {
+    from: 2020, to: 2022,
+    uk: "the strange flattened months of lockdowns and Zoom calls, a school leaving that never got its proper send-off, and a job market that's either frozen solid or suddenly desperate for anyone",
+    au: "state border closures that cut whole families off from each other, a school formal cancelled twice, and a JobKeeper-era workplace that's either shut or unrecognisably busy",
+    items: "a mask stuffed in a jacket pocket, a laptop that's seen a hundred video calls, a vaccination certificate on the phone",
+  },
+  {
+    from: 2023, to: 2026,
+    uk: "AI tools quietly doing half of everyone's coursework, a cost-of-living squeeze that makes every first payslip disappear fast, and a housing situation nobody under thirty finds funny",
+    au: "AI tools showing up in every uni assignment brief, rent that's eaten the whole first payslip before it lands, and a share house found through a group chat rather than an agency",
+    items: "a phone with more subscriptions than it can really afford, a share-house group chat pinned at the top, a half-used gift card",
+  },
+];
+
+function eraFor(year) {
+  return LIFE_ERAS.find((e) => year >= e.from && year <= e.to) || LIFE_ERAS[LIFE_ERAS.length - 1];
+}
+
+const LIFE_QUESTS = [
+  "Decide what actually happens next now that school's behind you — and stop everyone else from deciding it for you.",
+  "Get through the first week of a new job (or the job hunt for one) without the whole thing falling apart.",
+  "Patch things up with a friend or family member before whatever's gone unsaid becomes permanent.",
+  "Make it through a leaving party, a going-away, or a last night with everyone still together in one place.",
+  "Work out whether to leave home, and whether the people you'd be leaving actually want you to.",
+  "Sort out money, a room, or a plan for the next twelve months with almost nothing solid to build it on.",
+];
+
+function randomInt(min, max) {
+  return min + Math.floor(Math.random() * (max - min + 1));
+}
+
+function applyLifeSeed() {
+  const region = Math.random() < 0.5 ? "UK" : "Australia";
+  const year = randomInt(1992, 2026);
+  const era = eraFor(year);
+  const flavor = region === "UK" ? era.uk : era.au;
+  const place = region === "UK"
+    ? ["Manchester", "Cardiff", "Glasgow", "Bristol", "a small town outside Leeds", "a seaside town on the Kent coast"][randomInt(0, 5)]
+    : ["Melbourne", "Perth", "Brisbane", "a coastal town in NSW", "regional Victoria", "a suburb of Adelaide"][randomInt(0, 5)];
+
+  document.getElementById("setting").value =
+    `${place}, ${year}. You've just turned eighteen, right in the middle of ${flavor}.`;
+  document.getElementById("charName").value = "";
+  document.getElementById("charDesc").value =
+    `Eighteen years old as of this week, still figuring out who that actually makes you. Everyone around you seems to already have an opinion about what you do next.`;
+  document.getElementById("quest").value = LIFE_QUESTS[randomInt(0, LIFE_QUESTS.length - 1)];
+  document.getElementById("startItems").value = era.items;
+
+  const note = document.getElementById("randomizeNote");
+  note.textContent = `Loaded a ${region} story set in ${year} — you're eighteen. Fill in your name, then edit anything else, or roll again.`;
+  note.hidden = false;
+}
+
+document.getElementById("lifeRandomizeBtn").addEventListener("click", applyLifeSeed);
 
 // ---------- Setup wizard state ----------
 
@@ -271,7 +375,9 @@ let state = null; // built on startGame(); see shape below
     character: { name, desc, hp, maxHp },
     party: [{ name, role, hp, maxHp }],
     inventory: [string],
-    history: [{ role: "user"|"assistant", content: string }]  // sent to API
+    history: [{ role: "user"|"assistant", content: string }],  // running transcript sent to the API
+    summary: string,          // condensed recap of everything consolidated out of `history` so far
+    playerTurnCount: number,  // counts player actions, used to trigger consolidation
   }
 */
 
@@ -309,6 +415,8 @@ function startGame() {
     party,
     inventory: startItems,
     history: [],
+    summary: "",
+    playerTurnCount: 0,
   };
 
   document.getElementById("setup").hidden = true;
@@ -320,6 +428,10 @@ function startGame() {
 }
 
 function buildSystemPrompt() {
+  const recap = state.summary
+    ? `\nSTORY SO FAR (condensed recap of everything before the messages below — treat it as established fact, don't re-narrate it): ${state.summary}\n`
+    : "";
+
   return `You are the game master for a solo text adventure called "Waybook". Stay fully in character as narrator — never break the fiction, never mention that you are an AI.
 
 SETTING: ${state.setting}
@@ -329,7 +441,7 @@ PLAYER CHARACTER: ${state.character.name} — ${state.character.desc}
 PARTY: ${state.party.length ? state.party.map((p) => `${p.name} (${p.role})`).join(", ") : "traveling alone"}
 
 QUEST: ${state.quest}
-
+${recap}
 Rules for your narration:
 - Write vivid, concrete, second-person narration ("You..."), 120-220 words per turn.
 - Give the player real agency: end most turns with a situation that invites a choice, not a direct question.
@@ -353,43 +465,14 @@ async function requestTurn(playerActionText, opts = {}) {
   setBusy(true);
   hideGameError();
 
-  if (!opts.isOpening) {
-    appendEntry("player", playerActionText);
-    state.history.push({ role: "user", content: playerActionText });
-  } else {
-    state.history.push({ role: "user", content: playerActionText });
-  }
+  appendEntryForAction(playerActionText, opts.isOpening);
+  state.history.push({ role: "user", content: playerActionText });
 
   const typingEl = appendTyping();
 
   try {
-    const res = await fetch(ANTHROPIC_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": state.apiKey,
-        "anthropic-version": "2023-06-01",
-        "anthropic-dangerous-direct-browser-access": "true",
-      },
-      body: JSON.stringify({
-        model: state.model,
-        max_tokens: 700,
-        system: buildSystemPrompt(),
-        messages: state.history,
-      }),
-    });
-
-    if (!res.ok) {
-      const errBody = await res.json().catch(() => ({}));
-      throw new Error(errBody?.error?.message || `Request failed (${res.status})`);
-    }
-
-    const data = await res.json();
-    const rawText = (data.content || [])
-      .filter((b) => b.type === "text")
-      .map((b) => b.text)
-      .join("\n");
-
+    const res = await callModel(state.history);
+    const rawText = extractText(res);
     const { narration, patch } = parseTurn(rawText);
 
     state.history.push({ role: "assistant", content: rawText });
@@ -398,13 +481,17 @@ async function requestTurn(playerActionText, opts = {}) {
     appendEntry("gm", narration, patch);
     applyPatch(patch);
     renderDossier();
-    saveSession();
 
     if (patch.quest_complete) {
       appendEntry("system", "— The quest concludes here. Start a new expedition to continue. —");
       document.getElementById("actionInput").disabled = true;
       document.getElementById("sendBtn").disabled = true;
     }
+
+    if (!opts.isOpening) {
+      await maybeConsolidateHistory();
+    }
+    saveSession();
   } catch (err) {
     typingEl.remove();
     showGameError(err.message || "Something went wrong reaching the model.");
@@ -412,6 +499,41 @@ async function requestTurn(playerActionText, opts = {}) {
   } finally {
     setBusy(false);
   }
+}
+
+function appendEntryForAction(playerActionText, isOpening) {
+  if (!isOpening) appendEntry("player", playerActionText);
+}
+
+async function callModel(messages, maxTokens = 700) {
+  const res = await fetch(ANTHROPIC_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": state.apiKey,
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true",
+    },
+    body: JSON.stringify({
+      model: state.model,
+      max_tokens: maxTokens,
+      system: buildSystemPrompt(),
+      messages,
+    }),
+  });
+
+  if (!res.ok) {
+    const errBody = await res.json().catch(() => ({}));
+    throw new Error(errBody?.error?.message || `Request failed (${res.status})`);
+  }
+  return res.json();
+}
+
+function extractText(data) {
+  return (data.content || [])
+    .filter((b) => b.type === "text")
+    .map((b) => b.text)
+    .join("\n");
 }
 
 function parseTurn(rawText) {
@@ -448,6 +570,38 @@ function applyPatch(patch) {
 
 function clamp(n, min, max) {
   return Math.max(min, Math.min(max, n));
+}
+
+// ---------- History consolidation ----------
+// Every CONSOLIDATE_EVERY player turns, fold the running transcript into a
+// short recap and clear it out of `history`, so the message list sent to the
+// API each turn stays small no matter how long the adventure runs. The recap
+// is carried forward inside the system prompt instead (see buildSystemPrompt).
+
+async function maybeConsolidateHistory() {
+  state.playerTurnCount = (state.playerTurnCount || 0) + 1;
+  if (state.playerTurnCount % CONSOLIDATE_EVERY !== 0) return;
+  if (state.history.length < 2) return;
+
+  try {
+    const summaryReq = [
+      ...state.history,
+      {
+        role: "user",
+        content:
+          "Pause the story. In under 150 words, third person, present tense, summarize everything that's happened in this adventure so far: where the player is now, what's happened to them and their party, what they're carrying, and any unresolved threads. Do not invent new events. Do not include a <state> block — plain prose only.",
+      },
+    ];
+    const res = await callModel(summaryReq, 300);
+    const summaryText = extractText(res).trim();
+    if (summaryText) {
+      state.summary = state.summary ? `${state.summary}\n\n${summaryText}` : summaryText;
+      state.history = [];
+      appendEntry("system", "— story so far condensed to keep things running smoothly —");
+    }
+  } catch (e) {
+    /* consolidation is best-effort — if it fails, the transcript just keeps growing normally */
+  }
 }
 
 // ---------- Rendering ----------
@@ -595,7 +749,10 @@ function tryRestoreSession() {
 
   const log = document.getElementById("log");
   log.innerHTML = "";
-  state.history.forEach((turn) => {
+  if (state.summary) {
+    appendEntry("system", "— story so far — " + state.summary);
+  }
+  (state.history || []).forEach((turn) => {
     if (turn.role === "user") {
       // skip re-rendering the opening prompt itself
       if (turn.content.startsWith("Begin the adventure")) return;
