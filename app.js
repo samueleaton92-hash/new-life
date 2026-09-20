@@ -442,6 +442,9 @@ function startGame() {
   document.getElementById("log").innerHTML = "";
   document.getElementById("actionInput").disabled = false;
   document.getElementById("sendBtn").disabled = false;
+  document.getElementById("dossier").classList.remove("expanded");
+  document.getElementById("dossierToggle").textContent = "Details ▾";
+  document.getElementById("dossierToggle").setAttribute("aria-expanded", "false");
   renderDossier();
   saveSession();
 
@@ -676,20 +679,21 @@ function renderStorySoFar() {
   const chunks = state.summaryChunks || [];
   if (!chunks.length) return;
 
+  const wasOpen = document.getElementById("storySoFar")?.open;
   const existing = document.getElementById("storySoFar");
   if (existing) existing.remove();
 
   const latest = chunks[chunks.length - 1];
   const older = chunks.slice(0, -1).flat();
 
-  const box = document.createElement("div");
+  const box = document.createElement("details");
   box.id = "storySoFar";
   box.className = "story-so-far";
+  box.open = wasOpen || false;
 
-  const label = document.createElement("span");
-  label.className = "story-so-far-label";
-  label.textContent = "Story so far";
-  box.appendChild(label);
+  const summary = document.createElement("summary");
+  summary.textContent = "Story so far ▾";
+  box.appendChild(summary);
 
   const list = document.createElement("ul");
   latest.forEach((b) => {
@@ -700,25 +704,20 @@ function renderStorySoFar() {
   box.appendChild(list);
 
   if (older.length) {
-    const moreList = document.createElement("ul");
-    moreList.hidden = true;
+    const olderDetails = document.createElement("details");
+    olderDetails.className = "story-earlier";
+    const olderSummary = document.createElement("summary");
+    olderSummary.textContent = `Earlier (${older.length})`;
+    olderDetails.appendChild(olderSummary);
+
+    const olderList = document.createElement("ul");
     older.forEach((b) => {
       const li = document.createElement("li");
       li.textContent = b;
-      moreList.appendChild(li);
+      olderList.appendChild(li);
     });
-
-    const toggle = document.createElement("button");
-    toggle.type = "button";
-    toggle.className = "story-see-more";
-    toggle.textContent = `See more (${older.length})`;
-    toggle.addEventListener("click", () => {
-      moreList.hidden = !moreList.hidden;
-      toggle.textContent = moreList.hidden ? `See more (${older.length})` : "See less";
-    });
-
-    box.appendChild(toggle);
-    box.appendChild(moreList);
+    olderDetails.appendChild(olderList);
+    box.appendChild(olderDetails);
   }
 
   const log = document.getElementById("log");
@@ -804,8 +803,10 @@ function renderDossier() {
   fill.style.width = pct + "%";
   fill.className = "hp-fill" + (pct <= 25 ? " danger" : pct <= 55 ? " warn" : "");
   document.getElementById("hpText").textContent = `${state.character.hp} / ${state.character.maxHp}`;
+  document.getElementById("hpSummary").textContent = `HP ${state.character.hp}/${state.character.maxHp}`;
 
   document.getElementById("cashText").textContent = `${state.character.cash ?? 0}`;
+  document.getElementById("cashSummary").textContent = `Cash ${state.character.cash ?? 0}`;
 
   const statusList = document.getElementById("statusList");
   statusList.innerHTML = "";
@@ -874,6 +875,14 @@ document.getElementById("newGameBtn").addEventListener("click", () => {
   if (!confirm("Start a new game? This one will be cleared.")) return;
   localStorage.removeItem(STORAGE_KEY);
   quickStart(Math.random() < 0.5 ? "adventure" : "life");
+});
+
+document.getElementById("dossierToggle").addEventListener("click", () => {
+  const dossier = document.getElementById("dossier");
+  const nowOpen = !dossier.classList.contains("expanded");
+  dossier.classList.toggle("expanded", nowOpen);
+  document.getElementById("dossierToggle").textContent = nowOpen ? "Details ▲" : "Details ▾";
+  document.getElementById("dossierToggle").setAttribute("aria-expanded", String(nowOpen));
 });
 
 // ---------- Session persistence (survive a refresh) ----------
