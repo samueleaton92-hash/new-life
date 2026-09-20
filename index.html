@@ -11,46 +11,43 @@
 </head>
 <body>
 
-<!-- ============ SETUP WIZARD ============ -->
+<!-- ============ SETUP ============ -->
 <main id="setup" class="setup">
   <div class="setup-card">
     <header class="setup-head">
       <span class="setup-eyebrow">Waybook</span>
-      <h1>Open a new expedition</h1>
-      <p class="setup-sub">A few entries, then your game master takes the pen.</p>
-
-      <div class="randomize-row">
-        <button type="button" id="randomizeBtn" class="randomize-btn">🎲 Surprise me — UK / Australia story</button>
-        <button type="button" id="lifeRandomizeBtn" class="randomize-btn life-btn">🎂 Life at 18 — random year, 1992–2026</button>
-      </div>
-      <p class="randomize-note" id="randomizeNote" hidden></p>
+      <h1>Waybook</h1>
+      <p class="setup-sub">Drop in a key, roll for a story, go.</p>
     </header>
 
-    <div class="setup-steps" id="stepper"></div>
+    <label class="field">
+      <span class="field-label">Anthropic API key</span>
+      <input type="password" id="apiKey" placeholder="sk-ant-..." autocomplete="off">
+      <span class="field-hint">Stays in your browser. Never sent anywhere but api.anthropic.com.</span>
+    </label>
+    <label class="field">
+      <span class="field-label">Model</span>
+      <select id="model">
+        <option value="claude-sonnet-5">Claude Sonnet 5 — balanced (recommended)</option>
+        <option value="claude-opus-5">Claude Opus 5 — richest prose, slower</option>
+        <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 — fastest, leanest</option>
+      </select>
+    </label>
+    <label class="field-check">
+      <input type="checkbox" id="rememberKey">
+      <span>Remember key on this device (stored in localStorage — only do this on a private machine)</span>
+    </label>
 
-    <!-- Step 1: API key -->
-    <section class="step" data-step="0">
-      <label class="field">
-        <span class="field-label">Anthropic API key</span>
-        <input type="password" id="apiKey" placeholder="sk-ant-..." autocomplete="off">
-        <span class="field-hint">Stays in your browser. Never sent anywhere but api.anthropic.com.</span>
-      </label>
-      <label class="field">
-        <span class="field-label">Model</span>
-        <select id="model">
-          <option value="claude-sonnet-5">Claude Sonnet 5 — balanced (recommended)</option>
-          <option value="claude-opus-5">Claude Opus 5 — richest prose, slower</option>
-          <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 — fastest, leanest</option>
-        </select>
-      </label>
-      <label class="field-check">
-        <input type="checkbox" id="rememberKey">
-        <span>Remember key on this device (stored in localStorage — only do this on a private machine)</span>
-      </label>
-    </section>
+    <div class="quickstart-row">
+      <button type="button" id="newAdventureBtn" class="primary-btn quickstart-btn">🎲 New Adventure</button>
+      <button type="button" id="newLifeBtn" class="primary-btn quickstart-btn life-btn">🎂 New Life at 18</button>
+    </div>
+    <button type="button" id="customizeToggle" class="text-link-btn">Customize manually instead</button>
 
-    <!-- Step 2: Setting -->
-    <section class="step" data-step="1" hidden>
+    <p class="setup-error" id="setupError" hidden></p>
+
+    <!-- ===== Manual customize form (hidden by default) ===== -->
+    <section id="customizeForm" class="customize-form" hidden>
       <label class="field">
         <span class="field-label">Setting</span>
         <textarea id="setting" rows="3" placeholder="A drowned coastal city where the tide only goes out once a decade, revealing streets nobody living has walked."></textarea>
@@ -60,10 +57,7 @@
         <button type="button" class="chip" data-value="A low fantasy kingdom in its last good decade before the long winter everyone can feel coming.">Waning fantasy kingdom</button>
         <button type="button" class="chip" data-value="A 1920s port city run by three rival smuggling families and one incorruptible harbourmaster.">Smuggler's port, 1920s</button>
       </div>
-    </section>
 
-    <!-- Step 3: Character -->
-    <section class="step" data-step="2" hidden>
       <label class="field">
         <span class="field-label">Your character's name</span>
         <input type="text" id="charName" placeholder="Mireille Auberon">
@@ -72,24 +66,22 @@
         <span class="field-label">Who are they?</span>
         <textarea id="charDesc" rows="3" placeholder="A disbarred cartographer who reads currents like other people read faces. Owes a debt she can't pay in money."></textarea>
       </label>
-      <div class="two-col">
+      <div class="two-col three-col">
         <label class="field">
           <span class="field-label">Starting HP</span>
           <input type="number" id="startHp" value="20" min="1" max="200">
         </label>
+        <label class="field">
+          <span class="field-label">Starting cash</span>
+          <input type="number" id="startCash" value="20" min="0" max="100000">
+        </label>
       </div>
-    </section>
 
-    <!-- Step 4: Party -->
-    <section class="step" data-step="3" hidden>
-      <span class="field-label">Party members <span class="field-hint-inline">(optional — travel alone if you leave this empty)</span></span>
+      <span class="field-label">Party members <span class="field-hint-inline">(optional)</span></span>
       <div id="partyList" class="party-list"></div>
       <button type="button" id="addPartyMember" class="ghost-btn">+ Add companion</button>
-    </section>
 
-    <!-- Step 5: Quest -->
-    <section class="step" data-step="4" hidden>
-      <label class="field">
+      <label class="field" style="margin-top:18px;">
         <span class="field-label">What are you after?</span>
         <textarea id="quest" rows="3" placeholder="Find out what actually happened to the last expedition, and whether it's worth repeating their mistake."></textarea>
       </label>
@@ -97,13 +89,9 @@
         <span class="field-label">Starting items <span class="field-hint-inline">(comma separated, optional)</span></span>
         <input type="text" id="startItems" placeholder="brass compass, half a map, a debt letter">
       </label>
-    </section>
 
-    <div class="setup-nav">
-      <button type="button" id="prevStep" class="ghost-btn" hidden>Back</button>
-      <button type="button" id="nextStep" class="primary-btn">Continue</button>
-    </div>
-    <p class="setup-error" id="setupError" hidden></p>
+      <button type="button" id="beginCustomBtn" class="primary-btn">Begin expedition</button>
+    </section>
   </div>
 </main>
 
@@ -121,6 +109,15 @@
         <div class="hp-track"><div class="hp-fill" id="hpFill"></div></div>
         <span class="stat-value" id="hpText">—</span>
       </div>
+      <div class="stat-row">
+        <span class="stat-name">Cash</span>
+        <span class="stat-value cash-value" id="cashText">—</span>
+      </div>
+    </div>
+
+    <div class="dossier-section">
+      <span class="dossier-label">Status</span>
+      <ul id="statusList" class="status-list"></ul>
     </div>
 
     <div class="dossier-section">
@@ -138,7 +135,7 @@
       <p id="dQuest"></p>
     </div>
 
-    <button type="button" id="restartBtn" class="ghost-btn small">End expedition</button>
+    <button type="button" id="newGameBtn" class="ghost-btn small">🔁 New game</button>
   </aside>
 
   <section class="journal">
